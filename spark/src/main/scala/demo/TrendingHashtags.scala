@@ -51,13 +51,15 @@ object TrendingHashtags {
     // [END stream_setup]
 
     //process the stream
-    processTrendingHashTags(messagesStream,
-      windowLength.toInt,
-      slidingInterval.toInt,
-      10,
-      //decoupled handler that saves each separate result for processed to datastore
-      saveRDDtoDataStore(_, windowLength.toInt)
-    )
+//    processTrendingHashTags(messagesStream,
+//      windowLength.toInt,
+//      slidingInterval.toInt,
+//      10,
+//      //decoupled handler that saves each separate result for processed to datastore
+//      saveRDDtoDataStore(_, windowLength.toInt)
+//    )
+
+    messagesStream.filter(record => false).print()
     
 	ssc
   }
