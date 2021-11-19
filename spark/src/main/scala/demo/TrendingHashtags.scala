@@ -65,7 +65,7 @@ object TrendingHashtags {
   }
 
   def main(args: Array[String]): Unit = {
-    if (args.length != 5) {
+    if (args.length < 6) {
       System.err.println(
         """
           | Usage: TrendingHashtags <projectID> <windowLength> <slidingInterval> <totalRunningTime> <pubsubTopic>
