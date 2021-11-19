@@ -27,7 +27,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 object TrendingHashtags {
 
-  def createContext(projectID: String, windowLength: String, slidingInterval: String, checkpointDirectory: String, pubsubTopic: String)
+  def createContext(projectID: String, windowLength: String, slidingInterval: String, checkpointDirectory: String, pubsubSubscription: String)
     : StreamingContext = {
 
     // [START stream_setup]
@@ -45,7 +45,7 @@ object TrendingHashtags {
         ssc,
         projectID,
         None,
-        pubsubTopic,  // Cloud Pub/Sub subscription for incoming tweets
+        pubsubSubscription,  // Cloud Pub/Sub subscription for incoming tweets
         SparkGCPCredentials.builder.build(), StorageLevel.MEMORY_AND_DISK_SER_2)
       .map(message => new String(message.getData(), StandardCharsets.UTF_8))
     // [END stream_setup]
@@ -68,24 +68,24 @@ object TrendingHashtags {
     if (args.length < 6) {
       System.err.println(
         """
-          | Usage: TrendingHashtags <projectID> <windowLength> <slidingInterval> <totalRunningTime> <pubsubTopic>
+          | Usage: TrendingHashtags <projectID> <windowLength> <slidingInterval> <totalRunningTime> <pubsubSubscription>
           |
           |     <projectID>: ID of Google Cloud project
           |     <windowLength>: The duration of the window, in seconds
           |     <slidingInterval>: The interval at which the window calculation is performed, in seconds
           |     <totalRunningTime>: Total running time for the application, in minutes. If 0, runs indefinitely until termination.
           |     <checkpointDirectory>: Directory used to store RDD checkpoint data
-          |     <pubsubTopic>: pubsubTopic to read from
+          |     <pubsubSubscription>: pubsubSubscription to read from
           |
         """.stripMargin)
       System.exit(1)
     }
 
-    val Seq(projectID, windowLength, slidingInterval, totalRunningTime, checkpointDirectory, pubsubTopic) = args.toSeq
+    val Seq(projectID, windowLength, slidingInterval, totalRunningTime, checkpointDirectory, pubsubSubscription) = args.toSeq
 
     // Create Spark context
     val ssc = StreamingContext.getOrCreate(checkpointDirectory,
-      () => createContext(projectID, windowLength, slidingInterval, checkpointDirectory, pubsubTopic))
+      () => createContext(projectID, windowLength, slidingInterval, checkpointDirectory, pubsubSubscription))
 
     // Start streaming until we receive an explicit termination
     ssc.start()
