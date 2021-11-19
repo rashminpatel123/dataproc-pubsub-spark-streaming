@@ -27,7 +27,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 object TrendingHashtags {
 
-  def createContext(projectID: String, windowLength: String, slidingInterval: String, checkpointDirectory: String)
+  def createContext(projectID: String, windowLength: String, slidingInterval: String, checkpointDirectory: String, pubsubTopic: String)
     : StreamingContext = {
 
     // [START stream_setup]
@@ -45,7 +45,7 @@ object TrendingHashtags {
         ssc,
         projectID,
         None,
-        "tweets-subscription",  // Cloud Pub/Sub subscription for incoming tweets
+        pubsubTopic,  // Cloud Pub/Sub subscription for incoming tweets
         SparkGCPCredentials.builder.build(), StorageLevel.MEMORY_AND_DISK_SER_2)
       .map(message => new String(message.getData(), StandardCharsets.UTF_8))
     // [END stream_setup]
@@ -68,23 +68,24 @@ object TrendingHashtags {
     if (args.length != 5) {
       System.err.println(
         """
-          | Usage: TrendingHashtags <projectID> <windowLength> <slidingInterval> <totalRunningTime>
+          | Usage: TrendingHashtags <projectID> <windowLength> <slidingInterval> <totalRunningTime> <pubsubTopic>
           |
           |     <projectID>: ID of Google Cloud project
           |     <windowLength>: The duration of the window, in seconds
           |     <slidingInterval>: The interval at which the window calculation is performed, in seconds
           |     <totalRunningTime>: Total running time for the application, in minutes. If 0, runs indefinitely until termination.
           |     <checkpointDirectory>: Directory used to store RDD checkpoint data
+          |     <pubsubTopic>: pubsubTopic to read from
           |
         """.stripMargin)
       System.exit(1)
     }
 
-    val Seq(projectID, windowLength, slidingInterval, totalRunningTime, checkpointDirectory) = args.toSeq
+    val Seq(projectID, windowLength, slidingInterval, totalRunningTime, checkpointDirectory, pubsubTopic) = args.toSeq
 
     // Create Spark context
     val ssc = StreamingContext.getOrCreate(checkpointDirectory,
-      () => createContext(projectID, windowLength, slidingInterval, checkpointDirectory))
+      () => createContext(projectID, windowLength, slidingInterval, checkpointDirectory, pubsubTopic))
 
     // Start streaming until we receive an explicit termination
     ssc.start()
