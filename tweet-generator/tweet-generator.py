@@ -18,7 +18,7 @@ from faker.providers.lorem.en_US import Provider as LoremProvider
 from ratelimit import rate_limited
 
 
-if len(sys.argv) != 4:
+if len(sys.argv) < 5:
     print("""Error: Incorrect number of parameters.
 
     Usage: python tweet-generator.py <project> <time> <rate> <topicname>
