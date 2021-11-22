@@ -21,11 +21,12 @@ from ratelimit import rate_limited
 if len(sys.argv) != 4:
     print("""Error: Incorrect number of parameters.
 
-    Usage: python tweet-generator.py <project> <time> <rate>
+    Usage: python tweet-generator.py <project> <time> <rate> <topicname>
 
         - project: ID of your GCP project
         - time: total execution time, in minutes
         - rate: number of tweets generated per minute
+        - topicname: name of pubsub topic
 """)
     sys.exit()
 
@@ -35,7 +36,7 @@ TOTAL_TIME = int(sys.argv[2])  # in minutes
 RATE = int(sys.argv[3])  # in tweets per minute
 
 ONE_MINUTE = 60
-TOPIC_NAME = 'tweets'
+TOPIC_NAME = topicname
 TWEET_MAX_LENGTH = 140
 HASHTAG_MIN_LENGTH = 5
 HASHTAG_MAX_LENGTH = 15
