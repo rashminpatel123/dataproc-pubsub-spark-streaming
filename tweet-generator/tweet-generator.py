@@ -34,9 +34,9 @@ if len(sys.argv) < 5:
 PROJECT = sys.argv[1]
 TOTAL_TIME = int(sys.argv[2])  # in minutes
 RATE = int(sys.argv[3])  # in tweets per minute
+TOPIC_NAME = sys.argv[4] # pubsub topicname
 
 ONE_MINUTE = 60
-TOPIC_NAME = topicname
 TWEET_MAX_LENGTH = 140
 HASHTAG_MIN_LENGTH = 5
 HASHTAG_MAX_LENGTH = 15
