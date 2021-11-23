@@ -27,7 +27,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 object TrendingHashtags {
 
-  def createContext(projectID: String, windowLength: String, slidingInterval: String, checkpointDirectory: String, pubsubSubscription: String)
+  def createContext(projectID: String, windowLength: String, slidingInterval: String, checkpointDirectory: String, pubsubSubscription: String, mapSleepIntervalInMs: String)
     : StreamingContext = {
 
     // [START stream_setup]
@@ -59,16 +59,22 @@ object TrendingHashtags {
 //      saveRDDtoDataStore(_, windowLength.toInt)
 //    )
 
-    messagesStream.filter(record => false).print()
+    messagesStream
+      .map(record => {
+        Thread.sleep(mapSleepIntervalInMs.toInt)
+      record
+    })
+      .filter(record => false)
+      .print()
     
 	ssc
   }
 
   def main(args: Array[String]): Unit = {
-    if (args.length < 6) {
+    if (args.length < 7) {
       System.err.println(
         """
-          | Usage: TrendingHashtags <projectID> <windowLength> <slidingInterval> <totalRunningTime> <pubsubSubscription>
+          | Usage: TrendingHashtags <projectID> <windowLength> <slidingInterval> <totalRunningTime> <pubsubSubscription> <mapSleepIntervalInMs>
           |
           |     <projectID>: ID of Google Cloud project
           |     <windowLength>: The duration of the window, in seconds
@@ -76,16 +82,17 @@ object TrendingHashtags {
           |     <totalRunningTime>: Total running time for the application, in minutes. If 0, runs indefinitely until termination.
           |     <checkpointDirectory>: Directory used to store RDD checkpoint data
           |     <pubsubSubscription>: pubsubSubscription to read from
+          |     <mapSleepIntervalInMs>: mapSleepIntervalInMs in spark DAG
           |
         """.stripMargin)
       System.exit(1)
     }
 
-    val Seq(projectID, windowLength, slidingInterval, totalRunningTime, checkpointDirectory, pubsubSubscription) = args.toSeq
+    val Seq(projectID, windowLength, slidingInterval, totalRunningTime, checkpointDirectory, pubsubSubscription, mapSleepIntervalInMs) = args.toSeq
 
     // Create Spark context
     val ssc = StreamingContext.getOrCreate(checkpointDirectory,
-      () => createContext(projectID, windowLength, slidingInterval, checkpointDirectory, pubsubSubscription))
+      () => createContext(projectID, windowLength, slidingInterval, checkpointDirectory, pubsubSubscription, mapSleepIntervalInMs))
 
     // Start streaming until we receive an explicit termination
     ssc.start()
