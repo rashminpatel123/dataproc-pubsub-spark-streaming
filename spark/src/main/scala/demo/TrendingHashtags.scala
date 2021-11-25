@@ -20,7 +20,7 @@ import demo.DataStoreConverter.saveRDDtoDataStore
 import demo.HashTagsStreaming.processTrendingHashTags
 import org.apache.spark.SparkConf
 import org.apache.spark.storage.StorageLevel
-import org.apache.spark.streaming.dstream.DStream
+import org.apache.spark.streaming.dstream.{DStream, InputDStream}
 import org.apache.spark.streaming.pubsub.{PubsubUtils, SparkGCPCredentials}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
@@ -59,14 +59,17 @@ object TrendingHashtags {
 //      saveRDDtoDataStore(_, windowLength.toInt)
 //    )
 
+
+    // with forEachRDD
+
     messagesStream
-      .map(record => {
-        Thread.sleep(mapSleepIntervalInMs.toInt)
-      record
-    })
-      .filter(record => false)
-      .print()
-    
+      .foreachRDD(rdd => {
+        rdd.map(record => {Thread.sleep(mapSleepIntervalInMs.toInt)
+          record
+        })
+          .foreach(record => println(record))
+      })
+
 	ssc
   }
 
