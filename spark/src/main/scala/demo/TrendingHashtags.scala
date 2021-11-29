@@ -40,15 +40,24 @@ object TrendingHashtags {
     ssc.checkpoint(checkpointDirectory + '/' + jobId)
     
     // Create stream
-    val messagesStream: DStream[String] = PubsubUtils
+    val stream1: DStream[String] = PubsubUtils
       .createStream(
         ssc,
         projectID,
         None,
-        pubsubSubscription,  // Cloud Pub/Sub subscription for incoming tweets
+        pubsubSubscription + "-0",  // Cloud Pub/Sub subscription for incoming tweets
         SparkGCPCredentials.builder.build(), StorageLevel.MEMORY_AND_DISK_SER_2)
       .map(message => new String(message.getData(), StandardCharsets.UTF_8))
     // [END stream_setup]
+
+    val stream2: DStream[String] = PubsubUtils
+      .createStream(
+        ssc,
+        projectID,
+        None,
+        pubsubSubscription + "-1",  // Cloud Pub/Sub subscription for incoming tweets
+        SparkGCPCredentials.builder.build(), StorageLevel.MEMORY_AND_DISK_SER_2)
+      .map(message => new String(message.getData(), StandardCharsets.UTF_8))
 
     //process the stream
 //    processTrendingHashTags(messagesStream,
@@ -60,9 +69,11 @@ object TrendingHashtags {
 //    )
 
 
+    val unionedStream = stream1.union(stream2)
+
     // with forEachRDD
 
-    messagesStream
+    unionedStream
       .foreachRDD(rdd => {
         rdd.map(record => {Thread.sleep(mapSleepIntervalInMs.toInt)
           record
